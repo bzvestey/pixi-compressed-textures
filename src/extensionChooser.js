@@ -8,8 +8,22 @@ function extensionChooser(supportedExtensions) {
         if (!ext) {
             return next();
         }
-        //let us choose extension!
+        
+        //first we need to make sure we have the url with params and hash
+        //removed, so we can properly place the chosen extension.
         var url = resource.url;
+        var postfix = "";
+        var qStart = url.indexOf("?");
+        var hStart = url.indexOf("#");
+        if (qStart !== -1 || hStart !== -1) {
+          //we have to make sure we grab whatevery is first, the question or the
+          //hash, so we can pull out the full postfix to the file.
+          qStart = (hStart === -1 || (qStart > -1 && qStart < hStart))? qStart : hStart;
+          postfix = url.substring(qStart);
+          url = url.substring(0, qStart);
+        }
+
+        //let us choose extension!
         if (!resource._defaultUrlChoice) {
             resource._defaultUrlChoice = url;
             var k = url.lastIndexOf(".");
@@ -20,7 +34,7 @@ function extensionChooser(supportedExtensions) {
             }
         }
         for (var i = ext.length - 1; i >= 0; i--) {
-            url = resource._baseUrl + ext[i];
+            url = resource._baseUrl + ext[i] + postfix;
             var isSupported = false;
             for (var j = 0; j < supportedExtensions.length; j++) {
                 if (ext[i] === supportedExtensions[j]) {
